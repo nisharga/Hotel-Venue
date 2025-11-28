@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Venue {
+  id               String           @id @default(cuid())
+  name             String
+  description      String
+  location         String // City
+  address          String
+  capacity         Int // Maximum number of attendees
+  pricePerNight    Float // Price per night in USD
+  amenities        String[] // Array of amenities
+  imageUrl         String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  bookingInquiries BookingInquiry[]
+
+  @@index([location])
+  @@index([capacity])
+  @@index([pricePerNight])
+}
+
+model BookingInquiry {
+  id            String   @id @default(cuid())
+  venueId       String
+  venue         Venue    @relation(fields: [venueId], references: [id])
+  companyName   String
+  email         String
+  startDate     DateTime
+  endDate       DateTime
+  attendeeCount Int
+  status        String   @default("pending") // pending, confirmed, rejected
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([venueId])
+  @@index([startDate, endDate])
+}
